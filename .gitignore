@@ -4,6 +4,10 @@ node_modules/
 # Build
 dist/
 
+# Large generated data (app uses public/data/points/<cityId>.json instead)
+src/data/points.json
+src/data/cities.json
+
 # Logs
 *.log
 npm-debug.log*

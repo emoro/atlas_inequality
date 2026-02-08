@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+.maplibregl-map {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.maplibregl-canvas-container {
+  cursor: grab;
+}
+
+.maplibregl-canvas-container:active {
+  cursor: grabbing;
+}
+
+/* Let clicks pass through the deck.gl overlay canvas to the map (city polygons) */
+.maplibregl-ctrl:has(> div > canvas) canvas {
+  pointer-events: none;
+}
+
+/* When showing points, enable hover on the deck canvas for tooltips */
+.map-showing-points .maplibregl-ctrl:has(> div > canvas) canvas {
+  pointer-events: auto;
+}
