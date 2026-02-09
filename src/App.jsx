@@ -132,8 +132,8 @@ function App() {
         selectedCity={selectedCity}
         onSelectAnotherCity={onSelectAnotherCity}
       />
-      <div className="flex flex-1 min-h-0">
-        <div className="flex-1 relative min-w-0">
+      <div className="flex flex-1 min-h-0 border-0">
+        <div className="flex-1 relative min-w-0 border-0">
           <MapView
             selectedCity={selectedCity}
             onSelectCity={onSelectCity}

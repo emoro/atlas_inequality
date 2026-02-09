@@ -1,13 +1,17 @@
 /**
  * Top menu with Atlas of Inequality logo and "Select another city" when a city is selected.
  */
+const LOGO_SRC = `${import.meta.env.BASE_URL}images/atlas-of-inequality@2x.png`;
+
 export function AppHeader({ selectedCity, onSelectAnotherCity }) {
   return (
-    <header className="flex shrink-0 items-center justify-between px-4 py-3 bg-slate-900 border-b border-white/10">
+    <header className="flex shrink-0 items-center justify-between px-4 py-3 bg-slate-900">
       <div className="flex items-center gap-3">
-        <span className="text-lg font-bold tracking-tight text-white">
-          Atlas of Inequality
-        </span>
+        <img
+          src={LOGO_SRC}
+          alt="Atlas of Inequality"
+          className="h-8 w-auto object-contain"
+        />
       </div>
       {selectedCity && (
         <button
