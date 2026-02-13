@@ -46,6 +46,14 @@ export function PointTooltip({ x, y, point }) {
             {point.category || '—'}
           </div>
         </div>
+        {(point.subcategory != null && point.subcategory !== '') && (
+          <div className="mb-1.5">
+            <div className="text-[11px] text-slate-400">Subcategory</div>
+            <div className="text-sm font-semibold text-white truncate">
+              {point.subcategory}
+            </div>
+          </div>
+        )}
         {point.name != null && point.name !== '' && (
           <div className="mb-1.5">
             <div className="text-[11px] text-slate-400">Name</div>

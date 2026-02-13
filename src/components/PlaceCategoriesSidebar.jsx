@@ -15,7 +15,20 @@ function formatCount(n) {
   return n.toLocaleString();
 }
 
-function InequalityDistribution({ visiblePoints }) {
+const INCOME_OPTIONS = [
+  { id: null, label: 'All' },
+  { id: '$', label: '$' },
+  { id: '$$', label: '$$' },
+  { id: '$$$', label: '$$$' },
+  { id: '$$$$', label: '$$$$' },
+];
+
+function InequalityDistribution({
+  visiblePoints,
+  placesInViewCount,
+  selectedInequalityBin,
+  onSelectInequalityBin,
+}) {
   const histogram = useMemo(() => {
     if (!visiblePoints.length) return BINS.map((b) => ({ ...b, count: 0 }));
     return BINS.map((bin, i) => {
@@ -27,37 +40,51 @@ function InequalityDistribution({ visiblePoints }) {
   }, [visiblePoints]);
 
   const maxCount = Math.max(1, ...histogram.map((b) => b.count));
-  const totalCount = visiblePoints.length;
+  const totalCount = placesInViewCount ?? visiblePoints.length;
 
   return (
     <div className="px-5 py-5">
       <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
-        Inequality distribution
+        Place Inequality
       </h3>
-      <div
-        className="flex items-end gap-0.5 h-16 rounded overflow-hidden bg-white/5"
-        role="img"
-        aria-label="Histogram of visible points by inequality score"
-      >
-        {histogram.map((bin, i) => {
-          const heightPct = maxCount > 0 ? (bin.count / maxCount) * 100 : 0;
-          const heightPx = Math.max(bin.count > 0 ? 3 : 0, (heightPct / 100) * 64);
-          return (
+      <div className="py-2">
+        <div
+          className="flex items-end gap-0.5 h-16 overflow-visible"
+          role="group"
+          aria-label="Histogram of visible points by inequality score. Click a bar to filter."
+        >
+          {histogram.map((bin, i) => {
+            const heightPct = maxCount > 0 ? (bin.count / maxCount) * 100 : 0;
+            const heightPx = Math.max(bin.count > 0 ? 3 : 0, (heightPct / 100) * 64);
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => onSelectInequalityBin?.(i)}
+                className="flex-1 min-w-0 flex flex-col justify-end h-full cursor-pointer transition-opacity hover:opacity-90 focus:outline-none rounded-t min-h-[24px]"
+                title={`${bin.label}: ${bin.count.toLocaleString()} place${bin.count !== 1 ? 's' : ''}. Click to filter.`}
+              >
+                <div
+                  className="w-full rounded-t transition-all duration-300 ease-out"
+                  style={{
+                    height: heightPx,
+                    backgroundColor: bin.color,
+                  }}
+                />
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex gap-0.5 mt-1 h-1.5" aria-hidden="true">
+          {histogram.map((bin, i) => (
             <div
               key={i}
-              className="flex-1 min-w-0 flex flex-col justify-end h-full"
-              title={`${bin.label}: ${bin.count.toLocaleString()} place${bin.count !== 1 ? 's' : ''}`}
-            >
-              <div
-                className="w-full rounded-t transition-all duration-300 ease-out"
-                style={{
-                  height: heightPx,
-                  backgroundColor: bin.color,
-                }}
-              />
-            </div>
-          );
-        })}
+              className={`flex-1 min-w-0 rounded-sm transition-colors ${
+                selectedInequalityBin === i ? 'bg-white' : 'bg-transparent'
+              }`}
+            />
+          ))}
+        </div>
       </div>
       <div className="flex justify-between mt-2 px-0.5">
         <span className="text-[10px] text-slate-500">Equal</span>
@@ -76,7 +103,12 @@ function InequalityDistribution({ visiblePoints }) {
 export function PlaceCategoriesSidebar({
   selectedCategory,
   onSelectCategory,
+  selectedInequalityBin = null,
+  onSelectInequalityBin,
+  selectedMajorityIncome = null,
+  onSelectMajorityIncome,
   visiblePoints = [],
+  visiblePointsForHistogram = [],
   categories = [],
 }) {
   const categoryCounts = useMemo(() => {
@@ -91,17 +123,51 @@ export function PlaceCategoriesSidebar({
   const totalPlaces = visiblePoints.length;
 
   return (
-    <aside className="flex w-72 shrink-0 flex-col bg-black overflow-hidden border-0 border-l-0">
-      <InequalityDistribution visiblePoints={visiblePoints} />
+    <aside className="absolute top-4 right-4 w-72 z-10 flex flex-col bg-black/95 backdrop-blur-sm rounded-lg shadow-2xl shadow-black/50 max-h-[calc(100vh-2rem)] overflow-y-auto">
+      <p className="px-5 pt-4 pb-1 text-[11px] text-slate-500">
+        Combine filters below to see specific places on the map.
+      </p>
+      <InequalityDistribution
+        visiblePoints={visiblePointsForHistogram}
+        placesInViewCount={visiblePoints.length}
+        selectedInequalityBin={selectedInequalityBin}
+        onSelectInequalityBin={onSelectInequalityBin}
+      />
 
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex flex-col shrink-0 px-5 pb-3">
+        <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
+          Place majority
+        </h2>
+        <div className="flex flex-nowrap gap-1.5 overflow-x-auto min-w-0" role="group" aria-label="Filter by majority income group">
+          {INCOME_OPTIONS.map(({ id, label }) => {
+            const isSelected = selectedMajorityIncome === id;
+            return (
+              <button
+                key={id ?? 'all'}
+                type="button"
+                onClick={() => onSelectMajorityIncome?.(id)}
+                className={`shrink-0 px-2.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  isSelected
+                    ? 'bg-indigo-500/30 text-white'
+                    : 'text-slate-300 hover:bg-white/8 hover:text-white'
+                }`}
+                title={id ? `Places where ${label} is majority (>50% time spent)` : 'Show all places'}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex flex-col shrink-0">
         <div className="px-5 py-3">
           <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
             Place category
           </h2>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-1.5">
+        <nav className="overflow-y-auto py-1.5 max-h-[50vh]">
           <ul className="space-y-0.5 px-3">
             <li>
               <button

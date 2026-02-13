@@ -17,14 +17,14 @@ export function pointInPolygon([lng, lat], polygon) {
 }
 
 /**
- * Get first ring from GeoJSON geometry (exterior ring of Polygon or first polygon of MultiPolygon).
+ * Get all exterior rings from GeoJSON geometry (one per polygon in Polygon or MultiPolygon).
  */
-function getPolygonRing(geometry) {
-  if (!geometry || !geometry.coordinates) return null;
+function getPolygonRings(geometry) {
+  if (!geometry || !geometry.coordinates) return [];
   const coords = geometry.coordinates;
-  if (geometry.type === 'Polygon') return coords[0];
-  if (geometry.type === 'MultiPolygon') return coords[0]?.[0] ?? null;
-  return null;
+  if (geometry.type === 'Polygon') return coords[0] ? [coords[0]] : [];
+  if (geometry.type === 'MultiPolygon') return (coords || []).map((p) => p[0]).filter(Boolean);
+  return [];
 }
 
 /**
@@ -46,20 +46,34 @@ const DEFAULT_ZOOM = 10;
 
 /**
  * Parse GeoJSON FeatureCollection into app city format.
- * Each feature: Polygon or MultiPolygon. Uses properties.GEOID as id when present (e.g. CBSA data).
+ * Each feature: Polygon or MultiPolygon. Preserves all polygons (e.g. LA mainland + islands).
+ * Uses properties.GEOID as id when present (e.g. CBSA data).
  */
 export function parseGeoJSONCities(geojson) {
   const features = geojson?.features ?? [];
   return features.map((f, i) => {
-    const ring = getPolygonRing(f.geometry);
-    const polygon = ring ? ring.map(([lng, lat]) => [lng, lat]) : [];
-    const center = ringCenter(ring);
+    const rings = getPolygonRings(f.geometry);
+    const polygons = rings.map((ring) => ring.map(([lng, lat]) => [lng, lat]));
+    const firstRing = rings[0] ?? null;
     const props = f.properties ?? {};
+    const cityCenterLon = parseFloat(props.city_center_lon);
+    const cityCenterLat = parseFloat(props.city_center_lat);
+    const center =
+      Number.isFinite(cityCenterLon) && Number.isFinite(cityCenterLat)
+        ? [cityCenterLon, cityCenterLat]
+        : ringCenter(firstRing);
     const id = f.id ?? props.GEOID ?? props.id ?? props.name ?? `city-${i}`;
     const name = props.NAME ?? props.name ?? String(id);
     const zoom = typeof props.zoom === 'number' ? props.zoom : DEFAULT_ZOOM;
-    return { id: String(id), name: String(name), center, zoom, polygon };
-  }).filter((c) => c.polygon.length > 0);
+    return {
+      id: String(id),
+      name: String(name),
+      center,
+      zoom,
+      polygon: polygons[0] ?? [],
+      polygons,
+    };
+  }).filter((c) => c.polygons.length > 0 && c.polygons.some((p) => p.length > 0));
 }
 
 /**
@@ -79,6 +93,7 @@ export function parseCBSAPoints(csvText) {
     if (Number.isNaN(lon) || Number.isNaN(lat) || Number.isNaN(segregation)) continue;
     const score = Math.max(0, Math.min(1, segregation));
     const category = String(row.pcat ?? '').trim() || 'Other';
+    const subcategory = String(row.cat ?? '').trim() || undefined;
     const city = String(row.cbsa ?? '').trim() || undefined;
     const name = String(row.name ?? '').trim() || undefined;
     const p1a = parseFloat(row.p1a);
@@ -92,6 +107,7 @@ export function parseCBSAPoints(csvText) {
       city,
       id: `point-${i}`,
       ...(name && { name }),
+      ...(subcategory && { subcategory }),
     };
     if (!Number.isNaN(p1a)) point.p1a = Math.max(0, Math.min(1, p1a));
     if (!Number.isNaN(p2a)) point.p2a = Math.max(0, Math.min(1, p2a));

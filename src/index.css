@@ -36,3 +36,83 @@ html, body, #root {
 .map-showing-points .maplibregl-ctrl:has(> div > canvas) canvas {
   pointer-events: auto;
 }
+
+/* About page: profile grid (Principal Investigators, Researchers) */
+.content-about-profile-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem 3rem;
+  align-items: start;
+}
+.content-about-profile-grid li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0;
+  min-width: 0;
+}
+.content-about-profile-grid li img {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+}
+.content-about-profile-grid li p {
+  margin: 0;
+  color: rgb(229 231 235);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.content-about-profile-grid li strong {
+  color: white;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+.content-about-profile-grid li a {
+  color: #eab308;
+  text-decoration: none;
+}
+.content-about-profile-grid li a:hover {
+  text-decoration: underline;
+}
+
+/* Content modals: panel and scrollbar */
+.content-modal-panel {
+  background: linear-gradient(180deg, rgb(15 23 42) 0%, rgb(15 23 42) 40%, rgb(2 6 23) 100%);
+  border: 1px solid rgb(51 65 85 / 0.5);
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5), 0 0 0 1px rgb(255 255 255 / 0.03) inset;
+}
+.content-modal-body {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(71 85 105) transparent;
+}
+.content-modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+.content-modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.content-modal-body::-webkit-scrollbar-thumb {
+  background: rgb(71 85 105);
+  border-radius: 4px;
+}
+.content-modal-body::-webkit-scrollbar-thumb:hover {
+  background: rgb(100 116 139);
+}
+
+/* Modal content: lead paragraph and heading spacing */
+.content-modal-body article > p:first-of-type {
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgb(203 213 225);
+}
+.content-modal-body article > h2:first-of-type {
+  margin-top: 0;
+}

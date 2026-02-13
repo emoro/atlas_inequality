@@ -11,7 +11,7 @@ export function InequalityLegend() {
   return (
     <div className="absolute top-4 left-4 z-10 rounded-lg bg-slate-800/95 backdrop-blur-sm px-3 py-2 shadow-lg">
       <div className="text-xs font-semibold text-white uppercase tracking-wider mb-2">
-        Inequality index
+        Place Inequality
       </div>
       <div className="flex h-3 w-44 rounded overflow-hidden">
         {LEGEND_COLORS.map((color, i) => (
