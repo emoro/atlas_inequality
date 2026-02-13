@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 /** Bin edges and colors matching the inequality palette (5 bins). */
 const BINS = [
@@ -97,8 +97,25 @@ function InequalityDistribution({
   );
 }
 
+const SIDEBAR_MEDIA = '(min-width: 768px)';
+
+function useIsWideScreen() {
+  const [isWide, setIsWide] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia(SIDEBAR_MEDIA).matches : true
+  );
+  useEffect(() => {
+    const m = window.matchMedia(SIDEBAR_MEDIA);
+    const handler = () => setIsWide(m.matches);
+    m.addEventListener('change', handler);
+    setIsWide(m.matches);
+    return () => m.removeEventListener('change', handler);
+  }, []);
+  return isWide;
+}
+
 /**
  * Sidebar: inequality distribution (visible viewport) and place categories with counts.
+ * On narrow screens (< 768px) it is hidden by default and toggled via a floating button.
  */
 export function PlaceCategoriesSidebar({
   selectedCategory,
@@ -111,6 +128,9 @@ export function PlaceCategoriesSidebar({
   visiblePointsForHistogram = [],
   categories = [],
 }) {
+  const isWideScreen = useIsWideScreen();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   const categoryCounts = useMemo(() => {
     const map = new Map();
     for (const p of visiblePoints) {
@@ -122,8 +142,8 @@ export function PlaceCategoriesSidebar({
 
   const totalPlaces = visiblePoints.length;
 
-  return (
-    <aside className="absolute top-4 right-4 w-72 z-10 flex flex-col bg-black/95 backdrop-blur-sm rounded-lg shadow-2xl shadow-black/50 max-h-[calc(100vh-2rem)] overflow-y-auto">
+  const sidebarContent = (
+    <>
       <p className="px-5 pt-4 pb-1 text-[11px] text-slate-500">
         Combine filters below to see specific places on the map.
       </p>
@@ -210,6 +230,58 @@ export function PlaceCategoriesSidebar({
           </ul>
         </nav>
       </div>
-    </aside>
+    </>
+  );
+
+  const asideClass = 'flex flex-col bg-black/95 backdrop-blur-sm rounded-lg shadow-2xl shadow-black/50 max-h-[calc(100vh-2rem)] overflow-y-auto';
+  const asideContent = <aside className={`absolute top-4 right-4 w-72 z-10 ${asideClass}`}>{sidebarContent}</aside>;
+
+  if (isWideScreen) {
+    return asideContent;
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setMobileOpen(true)}
+        className="absolute top-4 right-4 z-10 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-800/95 backdrop-blur-sm text-white text-sm font-medium shadow-lg border border-slate-600 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        aria-label="Open filters"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+        </svg>
+        Filters
+      </button>
+      {mobileOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-20 bg-black/50"
+            aria-hidden
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="fixed inset-0 z-30 flex flex-col items-end pointer-events-none">
+            <div className="w-full max-w-[min(20rem,100%)] h-full flex flex-col pointer-events-auto bg-slate-900 border-l border-slate-700 shadow-2xl overflow-y-auto">
+              <div className="flex shrink-0 items-center justify-between gap-2 px-4 py-3 border-b border-slate-700">
+                <span className="text-sm font-semibold text-white">Filters</span>
+                <button
+                  type="button"
+                  onClick={() => setMobileOpen(false)}
+                  className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  aria-label="Close filters"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto px-2 pb-4">
+                {sidebarContent}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 }

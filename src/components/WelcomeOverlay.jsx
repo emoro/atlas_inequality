@@ -12,17 +12,16 @@ export function WelcomeOverlay({ onSelectCity }) {
         aria-hidden
       />
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
         role="dialog"
         aria-modal="true"
         aria-labelledby="welcome-title"
       >
         <div
-          className="w-full max-w-md max-h-[90vh] flex flex-col bg-[#3b3096] text-white shadow-2xl rounded-xl overflow-y-auto"
-          style={{ minWidth: 600 }}
+          className="w-full max-w-md max-h-[85dvh] sm:max-h-[90vh] flex flex-col bg-[#3b3096] text-white shadow-2xl rounded-xl overflow-y-auto"
         >
-          <div className="p-8 pb-6">
-            <div className="mb-8">
+          <div className="p-5 sm:p-8 pb-6">
+            <div className="mb-6 sm:mb-8">
               <img
                 src={LOGO_SRC}
                 alt="Atlas of Inequality"
@@ -34,22 +33,22 @@ export function WelcomeOverlay({ onSelectCity }) {
               Welcome to the Atlas of Inequality
             </h1>
 
-            <p className="text-white/95 text-[15px] leading-relaxed mb-5">
+            <p className="text-white/95 text-[14px] sm:text-[15px] leading-relaxed mb-4 sm:mb-5">
             We usually measure inequality by neighborhood. But cities are not only where people live. They are also where people go.
             </p>
 
-            <p className="text-white/95 text-[15px] leading-relaxed mb-5">
+            <p className="text-white/95 text-[14px] sm:text-[15px] leading-relaxed mb-4 sm:mb-5">
             Restaurants, stores, parks, offices, and other destinations reflect economic divides. Some places bring together people from different income backgrounds. Others are visited mostly by people from similar backgrounds.
             </p>
 
-            <p className="text-white/95 text-[15px] leading-relaxed mb-5">
+            <p className="text-white/95 text-[14px] sm:text-[15px] leading-relaxed mb-4 sm:mb-5">
             The Atlas of Inequality measures how economically mixed the visitors to each place are. Using aggregated and anonymized location data, we estimate the income distribution of people who visit millions of places across cities in the United States.            </p>
 
-            <p className="text-white/95 text-[15px] leading-relaxed mb-5">
+            <p className="text-white/95 text-[14px] sm:text-[15px] leading-relaxed mb-4 sm:mb-5">
             By shifting the focus from neighborhoods to everyday destinations, the Atlas reveals a new geography of inequality shaped by where people spend their time.
             </p>
 
-            <p className="text-white/95 text-[15px] leading-relaxed mb-8">
+            <p className="text-white/95 text-[14px] sm:text-[15px] leading-relaxed mb-6 sm:mb-8">
             Inequality is not only about where people live. It is also about the places they share and the ones they do not.
             </p>
 
